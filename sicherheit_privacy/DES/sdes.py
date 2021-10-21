@@ -23,24 +23,28 @@ def chain_funcs(seq_of_funcs):
     return combination
 
 
-def Si(matrix):
-    mapping = ["00", "01", "10", "11"]
+class Si:
 
-    def f(x):
-        if len(x) % 4 > 0:
+    def __init__(self, matrix, name=None):
+        self.matrix = matrix
+        self.name = name or 'Si'
+
+    def __call__(self, x):
+        mapping = ["00", "01", "10", "11"]
+
+        if len(x) != 4:
             raise ValueError(
-                "word length must be multiple of 4, '{}' given".format(x))
+                "word length must be 4, '{}' given".format(x))
         bit_pairs = [x[i:i+2] for i in range(0, len(x), 2)]
         indices = [int(bit_pair, 2) for bit_pair in bit_pairs]
         result = ''.join([
-            mapping[matrix[j][i]] for (i, j) in [
+            mapping[self.matrix[j][i]] for (i, j) in [
                 (indices[k], indices[k+1]) for k in range(0, len(indices), 2)
             ]
         ])
         if debug:
-            print(f"Si: {x} => {result}")
+            print(f"{self.name}: {x} => {result}")
         return result
-    return f
 
 
 def xor(word1, word2):
@@ -94,13 +98,13 @@ S0 = Si([
     [3, 2, 1, 0],
     [0, 2, 1, 3],
     [3, 1, 3, 2]
-])
+], name="S0")
 S1 = Si([
     [0, 1, 2, 3],
     [2, 0, 1, 3],
     [3, 0, 1, 0],
     [2, 1, 0, 3]
-])
+], name="S1")
 
 
 IP = StringPermutation(perm=(2, 6, 3, 1, 4, 8, 5, 7), name="IP")
