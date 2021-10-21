@@ -37,7 +37,8 @@ def Si(matrix):
                 (indices[k], indices[k+1]) for k in range(0, len(indices), 2)
             ]
         ])
-        print(f"Si: {x} => {result}")
+        if debug:
+            print(f"Si: {x} => {result}")
         return result
     return f
 
@@ -109,15 +110,21 @@ EP = StringPermutation(perm=(4, 1, 2, 3, 2, 3, 4, 1), name="EP")
 compute_K1 = chain_funcs([P8, R1, P10])
 compute_K2 = chain_funcs([P8, R2, R1, P10])
 
-debug = True
+debug = False
 
 
 def main(m, key):
-    print(sdes(m, key))
+    print(f"Message: {m}")
+    print(f"Key: {key}")
+    cyphered = sdes(m, key)
+    print(f"Cyphered text: {cyphered}")
 
 
 if __name__ == '__main__':
     import sys
+    import os
 
-    print(sys.argv)
-    main()
+    debug = True if os.getenv('DEBUG') == '1' else False
+
+    m, key = sys.argv[1:]
+    main(m, key)
