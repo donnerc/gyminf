@@ -76,8 +76,15 @@ def sdes(m, key):
     if not len(key) == 10 == key.count("1") + key.count("0"):
         raise ValueError(f"key must be a 10-bit binary string, given '{key}'")
 
+    if debug:
+        print(30 * "=")
+
     k1 = compute_K1(key)
     k2 = compute_K2(key)
+
+    if debug:
+        print(30 * "=")
+        print(f"K1 = {k1} and K2 = {k2}")
 
     return IP_inverse(EP_S0_S1_P4(SW(EP_S0_S1_P4(IP(m), k1)), k2))
 
@@ -126,5 +133,9 @@ if __name__ == '__main__':
 
     debug = True if os.getenv('DEBUG') == '1' else False
 
-    m, key = sys.argv[1:]
+    try:
+        m, key = sys.argv[1:]
+    except:
+        m, key = '00101010', '0110011011'
+
     main(m, key)
