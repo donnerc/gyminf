@@ -43,7 +43,7 @@ def Si(matrix):
     return f
 
 
-def string_xor(word1, word2):
+def xor(word1, word2):
 
     result = ''.join([str(int(x) ^ int(y)) for x, y in zip(word1, word2)])
     if debug:
@@ -66,7 +66,7 @@ def S0_S1(word):
 
 def EP_S0_S1_P4(word, key):
     left, right = split_in_two(word)
-    left = string_xor(left, P4(S0_S1(string_xor(EP(right), key))))
+    left = xor(left, P4(S0_S1(xor(EP(right), key))))
     return left + right
 
 
