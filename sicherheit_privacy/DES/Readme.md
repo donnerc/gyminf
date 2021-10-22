@@ -17,10 +17,6 @@ Key: 0110011011
 Cyphered text: 01000110
 ```
 
-By the way, the result obtained is different from the answer of the whole
-development on the slides, which is wrong. On the slides, there is a mistake on
-slide 17, because `S1(1100) = 11` and not `01`.
-
 ## Debug mode
 
 The whole trace can be printed by activating the debug mode. To activate
@@ -38,8 +34,8 @@ P10: 0110011011 => 1011010101
 R1: 1011010101 => 0110101011
 R2: 0110101011 => 1010101101
 P8: 1010101101 => 01101110
-==============================
 K1 = 01100111 and K2 = 01101110
+==============================
 IP: 00101010 => 00100011
 EP: 0011 => 10010110
 XOR(10010110, 01100111) => 11110001
@@ -51,9 +47,9 @@ SW: 00010011 => 00110001
 EP: 0001 => 10000010
 XOR(10000010, 01101110) => 11101100
 S0: 1110 => 11
-S1: 1100 => 11
-P4: 1111 => 1111
-XOR(0011, 1111) => 1100
-IP_inverse: 11000001 => 01000110
-Cyphered text: 01000110
+S1: 1100 => 01
+P4: 1101 => 1101
+XOR(0011, 1101) => 1110
+IP_inverse: 11100001 => 01100110
+Cyphered text: 01100110
 ```

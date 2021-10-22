@@ -28,20 +28,15 @@ class Si:
     def __init__(self, matrix, name=None):
         self.matrix = matrix
         self.name = name or 'Si'
+        self.mapping = ["00", "01", "10", "11"]
 
     def __call__(self, x):
-        mapping = ["00", "01", "10", "11"]
-
         if len(x) != 4:
             raise ValueError(
                 "word length must be 4, '{}' given".format(x))
-        bit_pairs = [x[i:i+2] for i in range(0, len(x), 2)]
-        indices = [int(bit_pair, 2) for bit_pair in bit_pairs]
-        result = ''.join([
-            mapping[self.matrix[j][i]] for (i, j) in [
-                (indices[k], indices[k+1]) for k in range(0, len(indices), 2)
-            ]
-        ])
+        row_index = int(x[0] + x[3], 2)
+        col_index = int(x[1] + x[2], 2)
+        result = self.mapping[self.matrix[row_index][col_index]]
         if debug:
             print(f"{self.name}: {x} => {result}")
         return result
@@ -87,8 +82,8 @@ def sdes(m, key):
     k2 = compute_K2(key)
 
     if debug:
-        print(30 * "=")
         print(f"K1 = {k1} and K2 = {k2}")
+        print(30 * "=")
 
     return IP_inverse(EP_S0_S1_P4(SW(EP_S0_S1_P4(IP(m), k1)), k2))
 
