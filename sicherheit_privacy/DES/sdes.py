@@ -1,3 +1,19 @@
+def xor(word1, word2):
+
+    result = ''.join([str(int(x) ^ int(y)) for x, y in zip(word1, word2)])
+    if debug:
+        print(f"XOR({word1}, {word2}) => {result}")
+    return result
+
+
+def split_in_two(word):
+    if len(word) % 2 > 0:
+        raise ValueError(
+            "Word length must be multiple of 2, '{}' given".format(word))
+    middle = len(word) // 2
+    return word[:middle], word[middle:]
+
+
 class StringPermutation:
 
     def __init__(self, perm, name=None):
@@ -43,52 +59,6 @@ class Si:
         return result
 
 
-def xor(word1, word2):
-
-    result = ''.join([str(int(x) ^ int(y)) for x, y in zip(word1, word2)])
-    if debug:
-        print(f"XOR({word1}, {word2}) => {result}")
-    return result
-
-
-def split_in_two(word):
-    if len(word) % 2 > 0:
-        raise ValueError(
-            "Word length must be multiple of 2, '{}' given".format(word))
-    middle = len(word) // 2
-    return word[:middle], word[middle:]
-
-
-def S0_S1(word):
-    r_left, r_right = split_in_two(word)
-    return S0(r_left) + S1(r_right)
-
-
-def EP_S0_S1_P4(word, key):
-    left, right = split_in_two(word)
-    left = xor(left, P4(S0_S1(xor(EP(right), key))))
-    return left + right
-
-
-def sdes(m, key):
-    if not len(m) == 8 == m.count("1") + m.count("0"):
-        raise ValueError(f"m must be a 8-bit binary string, given '{m}'")
-    if not len(key) == 10 == key.count("1") + key.count("0"):
-        raise ValueError(f"key must be a 10-bit binary string, given '{key}'")
-
-    if debug:
-        print(30 * "=")
-
-    k1 = compute_K1(key)
-    k2 = compute_K2(key)
-
-    if debug:
-        print(f"K1 = {k1} and K2 = {k2}")
-        print(30 * "=")
-
-    return IP_inverse(EP_S0_S1_P4(SW(EP_S0_S1_P4(IP(m), k1)), k2))
-
-
 S0 = Si([
     [1, 0, 3, 2],
     [3, 2, 1, 0],
@@ -114,8 +84,39 @@ R2 = StringPermutation(perm=(3, 4, 5, 1, 2, 8, 9, 10, 6, 7), name="R2")
 SW = StringPermutation(perm=(5, 6, 7, 8, 1, 2, 3, 4), name="SW")
 EP = StringPermutation(perm=(4, 1, 2, 3, 2, 3, 4, 1), name="EP")
 
-compute_K1 = chain_funcs([P8, R1, P10])
-compute_K2 = chain_funcs([P8, R2, R1, P10])
+
+class SDES:
+
+    def __init__(self, key):
+        if not len(key) == 10 == key.count("1") + key.count("0"):
+            raise ValueError(
+                f"key must be a 10-bit binary string, given '{key}'")
+        self.key = key
+        self.k1, self.k2 = SDES.compute_partial_keys(key)
+
+    @staticmethod
+    def compute_partial_keys(key):
+        compute_K1 = chain_funcs([P8, R1, P10])
+        compute_K2 = chain_funcs([P8, R2, R1, P10])
+        return compute_K1(key), compute_K2(key)
+
+    @staticmethod
+    def S0_S1(word):
+        r_left, r_right = split_in_two(word)
+        return S0(r_left) + S1(r_right)
+
+    @staticmethod
+    def EP_S0_S1_P4(word, partial_key):
+        left, right = split_in_two(word)
+        left = xor(left, P4(SDES.S0_S1(xor(EP(right), partial_key))))
+        return left + right
+
+    def encrypt(self, m):
+        return IP_inverse(SDES.EP_S0_S1_P4(SW(SDES.EP_S0_S1_P4(IP(m), self.k1)), self.k2))
+
+    def decrypt(self, cyphered):
+        return IP_inverse(SDES.EP_S0_S1_P4(SW(SDES.EP_S0_S1_P4(IP(cyphered), self.k2)), self.k1))
+
 
 debug = False
 
@@ -123,8 +124,11 @@ debug = False
 def main(m, key):
     print(f"Message: {m}")
     print(f"Key: {key}")
-    cyphered = sdes(m, key)
+    sdes = SDES(key)
+    cyphered = sdes.encrypt(m)
     print(f"Cyphered text: {cyphered}")
+    m = sdes.decrypt(cyphered)
+    print(f"Clear text: {m}")
 
 
 if __name__ == '__main__':
