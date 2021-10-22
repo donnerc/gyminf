@@ -6,13 +6,13 @@ class StringPermutation:
         self.mapping = dict()
 
     def permutate(self, string):
-        return ''.join([string[i-1] for i in self.perm])
+        result = ''.join([string[i-1] for i in self.perm])
+        if debug:
+            print(f"{self.name}: {string} => {result}")
+        return result
 
     def __call__(self, x):
-        result = self.permutate(x)
-        if debug:
-            print(f"{self.name}: {x} => {result}")
-        return result
+        return self.permutate(x)
 
 
 def chain_funcs(seq_of_funcs):
@@ -31,6 +31,7 @@ class Si:
         self.mapping = ["00", "01", "10", "11"]
 
     def __call__(self, x):
+        # matrix computation is done according to https://de.wikipedia.org/wiki/Data_Encryption_Standard#Die_Substitution
         if len(x) != 4:
             raise ValueError(
                 "word length must be 4, '{}' given".format(x))
