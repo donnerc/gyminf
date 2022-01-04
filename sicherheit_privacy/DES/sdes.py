@@ -92,7 +92,13 @@ class SDES:
             raise ValueError(
                 f"key must be a 10-bit binary string, given '{key}'")
         self.key = key
+        if debug:
+            print(40 * '#')
+            print(f"Compute partial keys")
         self.k1, self.k2 = SDES.compute_partial_keys(key)
+        if debug:
+            print(f"K1 = {self.k1} and K2 = {self.k2}")
+            print(40 * '#')
 
     @staticmethod
     def compute_partial_keys(key):
@@ -114,8 +120,8 @@ class SDES:
     def encrypt(self, m):
         return IP_inverse(SDES.EP_S0_S1_P4(SW(SDES.EP_S0_S1_P4(IP(m), self.k1)), self.k2))
 
-    def decrypt(self, cyphered):
-        return IP_inverse(SDES.EP_S0_S1_P4(SW(SDES.EP_S0_S1_P4(IP(cyphered), self.k2)), self.k1))
+    def decrypt(self, ciphered):
+        return IP_inverse(SDES.EP_S0_S1_P4(SW(SDES.EP_S0_S1_P4(IP(ciphered), self.k2)), self.k1))
 
 
 debug = False
@@ -125,21 +131,59 @@ def main(m, key):
     print(f"Message: {m}")
     print(f"Key: {key}")
     sdes = SDES(key)
-    cyphered = sdes.encrypt(m)
-    print(f"Cyphered text: {cyphered}")
-    m = sdes.decrypt(cyphered)
+    ciphered = sdes.encrypt(m)
+    print(f"Ciphered text: {ciphered}")
+    m = sdes.decrypt(ciphered)
     print(f"Clear text: {m}")
+
+
+def decrypt(c, key):
+    print(f"Ciphered: {c}")
+    print(f"key: {key}")
+    sdes = SDES(key)
+    m = sdes.decrypt(c)
+    print(f"Plaintext: {m}")
+
+
+def encrypt(m, key):
+    print(f"Plaintext: {m}")
+    print(f"key: {key}")
+    sdes = SDES(key)
+    c = sdes.encrypt(m)
+    print(f"Ciphertext: {c}")
 
 
 if __name__ == '__main__':
     import sys
     import os
 
-    debug = True if os.getenv('DEBUG') == '1' else False
+    config = {
+        'debug': False,
+        'mode': encrypt
+    }
+
+    def set_option(option, value):
+        def func():
+            config[option] = value
+        return func
+
+    # read options
+    options = {
+        '-D': set_option('debug', True),
+        '-d': set_option('mode', decrypt),
+        '-e': set_option('mode', encrypt),
+    }
+
+    for o in options:
+        if o in sys.argv:
+            options[o]()
+            sys.argv.remove(o)
+
+    debug = config['debug']
 
     try:
         m, key = sys.argv[1:]
     except:
         m, key = '00101010', '0110011011'
 
-    main(m, key)
+    config['mode'](m, key)
