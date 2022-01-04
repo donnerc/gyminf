@@ -181,6 +181,7 @@ if __name__ == '__main__':
 
     debug = config['debug']
 
+    # run the appropriate mode with the passed args
     try:
         m, key = sys.argv[1:]
     except:
